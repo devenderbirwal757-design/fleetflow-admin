@@ -119,6 +119,20 @@ export async function createTrip(input: TripInput) {
       .single();
 
     if (error) throw error;
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user) {
+      await supabase.from("notifications").insert({
+        user_id: user.id,
+        title: "New Trip Booked",
+        message: `Trip for ${parsed.data.customer_name} from ${parsed.data.pickup_location} to ${parsed.data.drop_location}`,
+        type: "trip_created",
+        trip_id: data.id,
+      });
+    }
+
     revalidatePath("/trips");
     return { data, error: null };
   } catch (error) {
@@ -167,7 +181,7 @@ export async function updateTripStatus(id: string, status: string) {
 
     const { data: trip, error: fetchError } = await supabase
       .from("trips")
-      .select("driver_id, vehicle_id")
+      .select("driver_id, vehicle_id, customer_name, drivers(name)")
       .eq("id", id)
       .single();
 
@@ -202,6 +216,45 @@ export async function updateTripStatus(id: string, status: string) {
     revalidatePath("/drivers");
     revalidatePath("/vehicles");
     revalidatePath("/dashboard");
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user && trip) {
+      const tripData = trip as typeof trip & { drivers?: { name: string } | null };
+      const driverName = tripData.drivers?.name ?? null;
+      const statusMessages: Record<string, { title: string; message: string }> = {
+        assigned: {
+          title: "Trip Assigned",
+          message: driverName
+            ? `${driverName} assigned to trip for ${trip.customer_name}`
+            : `Driver assigned to trip for ${trip.customer_name}`,
+        },
+        started: {
+          title: "Trip Started",
+          message: `Trip for ${trip.customer_name} has started`,
+        },
+        completed: {
+          title: "Trip Completed",
+          message: `Trip for ${trip.customer_name} has been completed`,
+        },
+        cancelled: {
+          title: "Trip Cancelled",
+          message: `Trip for ${trip.customer_name} was cancelled`,
+        },
+      };
+      const msg = statusMessages[status];
+      if (msg) {
+        await supabase.from("notifications").insert({
+          user_id: user.id,
+          title: msg.title,
+          message: msg.message,
+          type: `trip_${status}`,
+          trip_id: id,
+        });
+      }
+    }
+
     return { error: null };
   } catch (error) {
     return { error: (error as Error).message };
