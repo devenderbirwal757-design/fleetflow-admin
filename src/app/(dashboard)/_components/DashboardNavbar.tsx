@@ -103,7 +103,7 @@ function DashboardNavbar() {
 
   return (
     <header className="bg-background sticky top-0 z-20 flex h-14 items-center gap-4 border-b px-4 sm:px-6">
-      <Button variant="ghost" size="icon" className="md:hidden" onClick={open}>
+      <Button variant="ghost" size="icon" onClick={open}>
         <Menu className="h-5 w-5" />
       </Button>
 
