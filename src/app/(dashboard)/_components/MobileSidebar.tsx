@@ -48,7 +48,7 @@ function MobileSidebar() {
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && close()}>
-      <SheetContent side="left" className="w-60 p-0">
+      <SheetContent side="left" className="w-60 p-0" showCloseButton={false}>
         <SheetHeader className="flex h-14 flex-row items-center justify-between border-b px-4">
           <SheetTitle className="text-base">FleetFlow</SheetTitle>
           <Button variant="ghost" size="icon" onClick={close}>

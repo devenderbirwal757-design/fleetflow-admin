@@ -70,20 +70,21 @@ export default function LoginForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div className="space-y-2">
-        <label htmlFor="identifier" className="text-sm font-medium">
+        <label htmlFor="identifier" className="text-foreground text-sm font-medium">
           Email or Phone
         </label>
         <Input
           id="identifier"
           placeholder="admin@example.com or +91 9876543210"
           autoComplete="username"
+          className="h-10"
           {...register("identifier")}
         />
         {errors.identifier && <p className="text-destructive text-xs">{errors.identifier.message}</p>}
       </div>
 
       <div className="space-y-2">
-        <label htmlFor="password" className="text-sm font-medium">
+        <label htmlFor="password" className="text-foreground text-sm font-medium">
           Password
         </label>
         <Input
@@ -91,6 +92,7 @@ export default function LoginForm() {
           type="password"
           placeholder="••••••••"
           autoComplete="current-password"
+          className="h-10"
           {...register("password")}
         />
         {errors.password && <p className="text-destructive text-xs">{errors.password.message}</p>}
@@ -98,7 +100,7 @@ export default function LoginForm() {
 
       {serverError && <p className="text-destructive text-sm">{serverError}</p>}
 
-      <Button type="submit" className="w-full" disabled={isSubmitting}>
+      <Button type="submit" className="h-10 w-full" disabled={isSubmitting}>
         {isSubmitting ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />

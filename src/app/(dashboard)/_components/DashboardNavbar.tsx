@@ -14,7 +14,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ScrollArea } from "@/components/ui/scroll-area";
+
+import { useTheme } from "next-themes";
 import { useSidebar } from "@/hooks/use-sidebar";
 import { useUser } from "@/hooks/use-user";
 import { signOut } from "@/lib/actions/auth";
@@ -25,7 +26,7 @@ import {
   markAsRead,
 } from "@/lib/actions/notifications";
 import { ROLE_LABELS } from "@/types/auth";
-import { Menu, Search, Bell, LogOut, Settings, CheckCheck } from "lucide-react";
+import { Menu, Search, Bell, LogOut, Settings, CheckCheck, Sun, Moon } from "lucide-react";
 
 interface Notification {
   id: string;
@@ -54,6 +55,7 @@ function DashboardNavbar() {
   const router = useRouter();
   const { open } = useSidebar();
   const { user, role } = useUser();
+  const { theme, setTheme } = useTheme();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
 
@@ -118,6 +120,16 @@ function DashboardNavbar() {
       </div>
 
       <div className="flex flex-1 items-center justify-end gap-2 sm:flex-none">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+        >
+          <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+          <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+          <span className="sr-only">Toggle theme</span>
+        </Button>
+
         <DropdownMenu onOpenChange={(isOpen) => { if (isOpen) fetchNotifications(); }}>
           <DropdownMenuTrigger className="hover:bg-accent hover:text-accent-foreground relative flex h-9 items-center justify-center rounded-md outline-none">
             <Bell className="h-5 w-5" />
@@ -128,47 +140,51 @@ function DashboardNavbar() {
             )}
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-80">
-            <DropdownMenuLabel className="flex items-center justify-between">
-              <span>Notifications</span>
-              {unreadCount > 0 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 text-xs"
-                  onClick={handleMarkAllRead}
-                >
-                  <CheckCheck className="mr-1 h-3 w-3" />
-                  Mark all read
-                </Button>
-              )}
-            </DropdownMenuLabel>
+            <DropdownMenuGroup>
+              <DropdownMenuLabel className="flex items-center justify-between">
+                <span>Notifications</span>
+                {unreadCount > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={handleMarkAllRead}
+                  >
+                    <CheckCheck className="mr-1 h-3 w-3" />
+                    Mark all read
+                  </Button>
+                )}
+              </DropdownMenuLabel>
+            </DropdownMenuGroup>
             <DropdownMenuSeparator />
             {notifications.length === 0 ? (
               <div className="text-muted-foreground py-6 text-center text-sm">
                 No notifications yet
               </div>
             ) : (
-              <ScrollArea className="h-72">
-                {notifications.map((notif) => (
-                  <DropdownMenuItem
-                    key={notif.id}
-                    className={`flex flex-col items-start gap-1 py-2 ${
-                      !notif.is_read ? "bg-accent/50" : ""
-                    }`}
-                    onClick={() => handleNotificationClick(notif)}
-                  >
-                    <div className="flex w-full items-center justify-between">
-                      <span className="text-sm font-medium">{notif.title}</span>
+              <DropdownMenuGroup>
+                <div className="h-72 overflow-y-auto">
+                  {notifications.map((notif) => (
+                    <DropdownMenuItem
+                      key={notif.id}
+                      className={`flex flex-col items-start gap-1 py-2 ${
+                        !notif.is_read ? "bg-accent/50" : ""
+                      }`}
+                      onClick={() => handleNotificationClick(notif)}
+                    >
+                      <div className="flex w-full items-center justify-between">
+                        <span className="text-sm font-medium">{notif.title}</span>
+                        <span className="text-muted-foreground text-xs">
+                          {timeAgo(notif.created_at)}
+                        </span>
+                      </div>
                       <span className="text-muted-foreground text-xs">
-                        {timeAgo(notif.created_at)}
+                        {notif.message}
                       </span>
-                    </div>
-                    <span className="text-muted-foreground text-xs">
-                      {notif.message}
-                    </span>
-                  </DropdownMenuItem>
-                ))}
-              </ScrollArea>
+                    </DropdownMenuItem>
+                  ))}
+                </div>
+              </DropdownMenuGroup>
             )}
           </DropdownMenuContent>
         </DropdownMenu>
