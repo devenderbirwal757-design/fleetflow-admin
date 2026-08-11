@@ -9,7 +9,7 @@ export const metadata = {
 
 export default function RegisterPage() {
   return (
-    <Card className="w-full max-w-sm">
+    <Card className="mx-auto w-full max-w-sm">
       <CardHeader className="text-center">
         <CardTitle className="text-2xl">FleetFlow</CardTitle>
         <CardDescription>Create your account</CardDescription>
